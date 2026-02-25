@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boot Scoot Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Public+Sans:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-left" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-right" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Line Dance Tracker</p>
+        <h1>Boot Scoot Stats</h1>
+        <p class="subtitle">Save playlists and learn what gets played most often.</p>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html" class="active">Playlists</a>
+        <a href="dance-notes.html">Dance Notes</a>
+        <a href="dance-database.html">Dance Database</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel input-panel">
+        <h2>Add a Playlist</h2>
+
+        <form id="playlist-form">
+          <div class="field-grid">
+            <label>
+              Date
+              <input type="date" id="playlist-date" required />
+            </label>
+
+            <label>
+              Venue / Event (optional)
+              <input type="text" id="playlist-venue" placeholder="Hill Country Line" />
+            </label>
+          </div>
+
+          <fieldset class="entry-builder">
+            <legend>Add Section Block</legend>
+            <div class="field-grid">
+              <label>
+                Section
+                <select id="section-select">
+                  <option value="Warm Up">Warm Up</option>
+                  <option value="After Lesson 1">After Lesson 1</option>
+                  <option value="After Lesson 2">After Lesson 2</option>
+                  <option value="After Lesson 3">After Lesson 3</option>
+                  <option value="Custom">Custom...</option>
+                </select>
+              </label>
+
+              <label id="custom-section-wrap" class="hidden">
+                Custom section name
+                <input type="text" id="custom-section" placeholder="Section name" />
+              </label>
+            </div>
+
+            <label>
+              Dance names (one per line)
+              <textarea id="dance-lines" rows="6" placeholder="Two Step&#10;Texas Time&#10;Afterparty"></textarea>
+            </label>
+
+            <div class="entry-actions">
+              <button type="button" id="add-lines-btn" class="secondary">Add Section Block</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="entry-builder">
+            <legend>Import from Photo</legend>
+            <label>
+              Playlist photo
+              <input type="file" id="playlist-image" accept="image/*" />
+            </label>
+            <div class="entry-actions">
+              <button type="button" id="read-image-btn" class="secondary">Read Photo and Add Dances</button>
+            </div>
+            <p id="ocr-status" class="muted">Upload a photo to auto-fill dances.</p>
+          </fieldset>
+
+          <div class="current-list-wrap">
+            <h3>Current Night Sections</h3>
+            <p id="empty-current" class="muted">No section blocks added yet.</p>
+            <div id="current-sections" class="section-list"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit">Save Playlist</button>
+            <button type="button" id="clear-current" class="danger">Clear Current Night</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel stats-panel">
+        <div class="stats-header">
+          <h2>Stats</h2>
+          <button id="recalc-btn" class="secondary">Recalculate</button>
+        </div>
+
+        <details class="stats-filters" id="stats-filters" open>
+          <summary>Most Frequent Filters</summary>
+          <div id="stats-filters-body">
+            <div class="field-grid">
+              <label>
+                Top N overall
+                <input type="number" id="stats-top-n" min="1" max="50" value="10" />
+              </label>
+              <label>
+                Top N per section
+                <input type="number" id="stats-section-top-n" min="1" max="20" value="5" />
+              </label>
+            </div>
+            <div class="field-grid">
+              <label>
+                Rank by
+                <select id="stats-rank-mode">
+                  <option value="plays">Total plays</option>
+                  <option value="nights">Nights appeared</option>
+                </select>
+              </label>
+              <label>
+                Minimum nights appeared
+                <input type="number" id="stats-min-nights" min="1" max="99" value="1" />
+              </label>
+            </div>
+            <div class="field-grid">
+              <label>
+                Beginner filter
+                <select id="stats-beginner-filter">
+                  <option value="all">All dances</option>
+                  <option value="beginner_only">Beginner only</option>
+                  <option value="exclude_beginner">Exclude beginner</option>
+                </select>
+              </label>
+            </div>
+            <div id="stats-sections-filter" class="stats-sections-filter"></div>
+          </div>
+        </details>
+
+        <div id="summary-cards" class="summary-cards"></div>
+
+        <div class="stats-group">
+          <h3 id="top-dances-title">Top 10 Most Frequently Played Overall</h3>
+          <ul id="top-dances" class="rank-list"></ul>
+        </div>
+
+        <div class="stats-group">
+          <h3 id="section-top-dances-title">Most Frequently Played by Section (Top 5)</h3>
+          <div id="section-top-dances" class="by-section-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="panel history-panel">
+      <div class="history-header">
+        <h2>Saved Playlists</h2>
+        <p class="muted">View by section and edit playlists anytime.</p>
+      </div>
+      <div id="saved-playlists" class="history-list"></div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="data-store.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

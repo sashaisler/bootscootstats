@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dance Database</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Public+Sans:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-left" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-right" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Line Dance Tracker</p>
+        <h1>Dance Database</h1>
+        <p class="subtitle">Search dances you have seen and tag them as beginner for better filtering.</p>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html">Playlists</a>
+        <a href="dance-notes.html">Dance Notes</a>
+        <a href="dance-database.html" class="active">Dance Database</a>
+      </nav>
+    </header>
+
+    <main class="single-layout">
+      <section class="panel">
+        <h2>Dance Filters</h2>
+        <div class="field-grid">
+          <label>
+            Search dance
+            <input type="text" id="db-search" placeholder="Type dance name" />
+          </label>
+          <label>
+            Section
+            <select id="db-section-filter">
+              <option value="all">All sections</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid">
+          <label>
+            Beginner tag
+            <select id="db-beginner-filter">
+              <option value="all">All</option>
+              <option value="beginner_only">Beginner only</option>
+              <option value="exclude_beginner">Exclude beginner</option>
+            </select>
+          </label>
+          <label>
+            Minimum plays
+            <input type="number" id="db-min-plays" min="1" max="99" value="1" />
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Seen Dances</h2>
+        <div class="db-table-wrap">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Dance</th>
+                <th>Plays</th>
+                <th>Sections</th>
+                <th>Beginner</th>
+              </tr>
+            </thead>
+            <tbody id="db-results"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="data-store.js"></script>
+    <script src="dance-database.js"></script>
+  </body>
+</html>

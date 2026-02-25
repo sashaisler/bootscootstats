@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dance Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Public+Sans:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-left" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-right" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Line Dance Tracker</p>
+        <h1>Dance Notes</h1>
+        <p class="subtitle">Track your confidence level for each dance.</p>
+      </div>
+      <nav class="top-nav">
+        <a href="index.html">Playlists</a>
+        <a href="dance-notes.html" class="active">Dance Notes</a>
+        <a href="dance-database.html">Dance Database</a>
+      </nav>
+    </header>
+
+    <main class="single-layout">
+      <section class="panel">
+        <h2>Add or Update Dance Note</h2>
+        <form id="note-form" class="note-form">
+          <div class="field-grid">
+            <label>
+              Dance name
+              <input
+                type="text"
+                id="note-dance-name"
+                list="notes-dance-suggestions"
+                placeholder="Ex: Askin' Questions"
+                required
+              />
+              <datalist id="notes-dance-suggestions"></datalist>
+            </label>
+            <label>
+              Status
+              <select id="note-status">
+                <option value="know_well">Know Very Well</option>
+                <option value="need_practice">Need Practice</option>
+                <option value="want_to_learn">Want to Learn</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit">Save Note</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Your Dance Notes</h2>
+        <label>
+          Search dances
+          <input type="text" id="notes-search" placeholder="Search by dance name" />
+        </label>
+        <div class="notes-columns">
+          <article class="note-lane know-lane">
+            <h3>Know Very Well</h3>
+            <div id="notes-know-well" class="compact-list"></div>
+          </article>
+          <article class="note-lane practice-lane">
+            <h3>Need Practice</h3>
+            <div id="notes-need-practice" class="compact-list"></div>
+          </article>
+          <article class="note-lane learn-lane">
+            <h3>Want to Learn</h3>
+            <div id="notes-want-to-learn" class="compact-list"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="data-store.js"></script>
+    <script src="notes.js"></script>
+  </body>
+</html>
