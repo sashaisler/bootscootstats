@@ -442,6 +442,11 @@ button.danger {
   margin: 1rem auto 0;
 }
 
+.history-panel .history-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
 .history-item {
   border: 1px solid var(--line);
   background: #fff;
@@ -449,6 +454,11 @@ button.danger {
   padding: 0.75rem;
   display: grid;
   gap: 0.6rem;
+}
+
+.history-panel .history-item {
+  padding: 0.55rem 0.65rem;
+  gap: 0.4rem;
 }
 
 .history-main {
@@ -461,6 +471,11 @@ button.danger {
   font-weight: 800;
 }
 
+.history-panel .history-date {
+  font-size: 0.98rem;
+  line-height: 1.15;
+}
+
 .history-venue,
 .history-count,
 .muted {
@@ -468,10 +483,42 @@ button.danger {
   color: var(--muted);
 }
 
+.history-panel .history-venue,
+.history-panel .history-count,
+.history-panel summary {
+  font-size: 0.84rem;
+  line-height: 1.2;
+}
+
+.history-panel .history-actions {
+  margin-top: 0.2rem;
+  gap: 0.4rem;
+}
+
+.history-panel .history-actions button {
+  margin-top: 0;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.82rem;
+}
+
 .grouped-sections {
   margin-top: 0.65rem;
   display: grid;
   gap: 0.55rem;
+}
+
+.history-panel .grouped-sections {
+  margin-top: 0.4rem;
+  gap: 0.4rem;
+}
+
+.history-panel .section-card.compact {
+  padding: 0.45rem 0.55rem;
+}
+
+.history-panel .mini-dance-list {
+  margin-top: 0.35rem;
+  gap: 0.15rem;
 }
 
 .note-form {
@@ -630,6 +677,10 @@ button.danger {
   .history-actions,
   .notes-columns,
   .data-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .history-panel .history-list {
     grid-template-columns: 1fr;
   }
 

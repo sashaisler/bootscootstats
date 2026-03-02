@@ -34,7 +34,13 @@ const statsFilters = {
   includedSections: new Set(getAllSectionNames(playlists)),
 };
 
+sortPlaylistsChronologically(playlists);
+
 init();
+
+function sortPlaylistsChronologically(list) {
+  return list.sort((a, b) => a.date.localeCompare(b.date));
+}
 
 function init() {
   dateInput.value = new Date().toISOString().slice(0, 10);
@@ -118,7 +124,7 @@ function saveCurrentNight() {
     sections: cleaned,
   };
 
-  playlists = [playlist, ...playlists].sort((a, b) => b.date.localeCompare(a.date));
+  playlists = sortPlaylistsChronologically([playlist, ...playlists]);
   savePlaylists(playlists);
   syncStatsSectionFilterOptions();
 
@@ -293,7 +299,7 @@ function buildPlaylistEditor(playlist) {
     playlist.date = dateInputEdit.value;
     playlist.venue = venueInputEdit.value.trim();
     playlist.sections = cleaned;
-    playlists.sort((a, b) => b.date.localeCompare(a.date));
+    sortPlaylistsChronologically(playlists);
 
     savePlaylists(playlists);
     syncStatsSectionFilterOptions();
