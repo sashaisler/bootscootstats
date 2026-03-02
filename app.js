@@ -7,7 +7,6 @@ const customSectionInput = document.querySelector("#custom-section");
 const danceLinesInput = document.querySelector("#dance-lines");
 const addLinesBtn = document.querySelector("#add-lines-btn");
 const clearCurrentBtn = document.querySelector("#clear-current");
-const recalcBtn = document.querySelector("#recalc-btn");
 
 const statsTopNInput = document.querySelector("#stats-top-n");
 const statsSectionTopNInput = document.querySelector("#stats-section-top-n");
@@ -68,7 +67,6 @@ function wireEvents() {
     saveCurrentNight();
   });
 
-  recalcBtn.addEventListener("click", renderStats);
   statsTopNInput.addEventListener("change", onStatsFilterChange);
   statsSectionTopNInput.addEventListener("change", onStatsFilterChange);
   statsIncludeBeginnerCheckbox.addEventListener("change", onStatsFilterChange);
