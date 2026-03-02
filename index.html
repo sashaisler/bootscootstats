@@ -82,18 +82,6 @@
             </div>
           </fieldset>
 
-          <fieldset class="entry-builder">
-            <legend>Import from Photo</legend>
-            <label>
-              Playlist photo
-              <input type="file" id="playlist-image" accept="image/*" />
-            </label>
-            <div class="entry-actions">
-              <button type="button" id="read-image-btn" class="secondary">Read Photo and Add Dances</button>
-            </div>
-            <p id="ocr-status" class="muted">Upload a photo to auto-fill dances.</p>
-          </fieldset>
-
           <div class="current-list-wrap">
             <h3>Current Night Sections</h3>
             <p id="empty-current" class="muted">No section blocks added yet.</p>
@@ -126,27 +114,10 @@
                 <input type="number" id="stats-section-top-n" min="1" max="20" value="5" />
               </label>
             </div>
-            <div class="field-grid">
-              <label>
-                Rank by
-                <select id="stats-rank-mode">
-                  <option value="plays">Total plays</option>
-                  <option value="nights">Nights appeared</option>
-                </select>
-              </label>
-              <label>
-                Minimum nights appeared
-                <input type="number" id="stats-min-nights" min="1" max="99" value="1" />
-              </label>
-            </div>
-            <div class="field-grid">
-              <label>
-                Beginner filter
-                <select id="stats-beginner-filter">
-                  <option value="all">All dances</option>
-                  <option value="beginner_only">Beginner only</option>
-                  <option value="exclude_beginner">Exclude beginner</option>
-                </select>
+            <div class="stats-inline-row">
+              <label class="stats-section-option">
+                <input type="checkbox" id="stats-include-beginner" checked />
+                <span>Include beginner dances</span>
               </label>
             </div>
             <div id="stats-sections-filter" class="stats-sections-filter"></div>
@@ -175,7 +146,6 @@
       <div id="saved-playlists" class="history-list"></div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="data-store.js"></script>
     <script src="data-tools.js"></script>
     <script src="app.js"></script>

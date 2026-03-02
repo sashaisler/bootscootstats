@@ -5,18 +5,13 @@ const sectionSelect = document.querySelector("#section-select");
 const customSectionWrap = document.querySelector("#custom-section-wrap");
 const customSectionInput = document.querySelector("#custom-section");
 const danceLinesInput = document.querySelector("#dance-lines");
-const playlistImageInput = document.querySelector("#playlist-image");
-const readImageBtn = document.querySelector("#read-image-btn");
-const ocrStatusEl = document.querySelector("#ocr-status");
 const addLinesBtn = document.querySelector("#add-lines-btn");
 const clearCurrentBtn = document.querySelector("#clear-current");
 const recalcBtn = document.querySelector("#recalc-btn");
 
 const statsTopNInput = document.querySelector("#stats-top-n");
 const statsSectionTopNInput = document.querySelector("#stats-section-top-n");
-const statsRankModeSelect = document.querySelector("#stats-rank-mode");
-const statsMinNightsInput = document.querySelector("#stats-min-nights");
-const statsBeginnerFilterSelect = document.querySelector("#stats-beginner-filter");
+const statsIncludeBeginnerCheckbox = document.querySelector("#stats-include-beginner");
 const statsSectionsFilterEl = document.querySelector("#stats-sections-filter");
 
 const currentSectionsEl = document.querySelector("#current-sections");
@@ -31,14 +26,11 @@ const savedPlaylistsEl = document.querySelector("#saved-playlists");
 let currentSections = [];
 let playlists = loadPlaylists();
 let danceMeta = loadDanceMeta();
-let imageReadInProgress = false;
 let statsSectionFiltersInitialized = false;
 const statsFilters = {
   topN: 10,
   sectionTopN: 5,
-  rankMode: "plays",
-  minNights: 1,
-  beginnerFilter: "all",
+  includeBeginner: true,
   includedSections: new Set(getAllSectionNames(playlists)),
 };
 
@@ -61,7 +53,6 @@ function wireEvents() {
   });
 
   addLinesBtn.addEventListener("click", addSectionBlockToCurrentNight);
-  readImageBtn.addEventListener("click", importFromImage);
   clearCurrentBtn.addEventListener("click", () => {
     currentSections = [];
     renderCurrentSections();
@@ -74,9 +65,7 @@ function wireEvents() {
   recalcBtn.addEventListener("click", renderStats);
   statsTopNInput.addEventListener("change", onStatsFilterChange);
   statsSectionTopNInput.addEventListener("change", onStatsFilterChange);
-  statsRankModeSelect.addEventListener("change", onStatsFilterChange);
-  statsMinNightsInput.addEventListener("change", onStatsFilterChange);
-  statsBeginnerFilterSelect.addEventListener("change", onStatsFilterChange);
+  statsIncludeBeginnerCheckbox.addEventListener("change", onStatsFilterChange);
   statsSectionsFilterEl.addEventListener("change", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement) || target.type !== "checkbox") return;
@@ -108,91 +97,6 @@ function addSectionBlockToCurrentNight() {
 
   danceLinesInput.value = "";
   renderCurrentSections();
-}
-
-async function importFromImage() {
-  if (imageReadInProgress) return;
-
-  const file = playlistImageInput.files?.[0];
-  if (!file) {
-    setOcrStatus("Choose a photo first.");
-    return;
-  }
-
-  if (!window.Tesseract?.recognize) {
-    setOcrStatus("OCR library failed to load. Refresh and try again.");
-    return;
-  }
-
-  imageReadInProgress = true;
-  readImageBtn.disabled = true;
-  setOcrStatus("Reading photo...");
-
-  try {
-    const result = await window.Tesseract.recognize(file, "eng", {
-      logger: (msg) => {
-        if (msg.status === "recognizing text" && typeof msg.progress === "number") {
-          setOcrStatus(`Reading photo... ${Math.round(msg.progress * 100)}%`);
-        }
-      },
-    });
-
-    const parsedEntries = parseEntriesFromOcr(result?.data?.text || "");
-    if (parsedEntries.length === 0) {
-      setOcrStatus("No dance names found. Try a clearer, closer photo.");
-      return;
-    }
-
-    parsedEntries.forEach((entry) => {
-      const existing = currentSections.find((section) => normalizeKey(section.name) === normalizeKey(entry.section));
-      const dance = { id: createId(), name: entry.name };
-      if (existing) existing.dances.push(dance);
-      if (!existing) currentSections.push({ id: createId(), name: entry.section, dances: [dance] });
-    });
-
-    renderCurrentSections();
-    setOcrStatus(`Added ${parsedEntries.length} dances from photo.`);
-    playlistImageInput.value = "";
-  } catch {
-    setOcrStatus("Could not read this image. Try another photo.");
-  } finally {
-    imageReadInProgress = false;
-    readImageBtn.disabled = false;
-  }
-}
-
-function parseEntriesFromOcr(text) {
-  const lines = String(text || "")
-    .split(/\r?\n/)
-    .map((line) => line.replace(/\s+/g, " ").trim())
-    .filter(Boolean);
-
-  const entries = [];
-  let section = "After Lesson 3";
-
-  lines.forEach((line) => {
-    const normalized = line.toLowerCase();
-    const inlineLesson = line.match(/^lesson\s*([123])\s*[:\-]\s*(.+)$/i);
-    if (inlineLesson) {
-      section = `After Lesson ${inlineLesson[1]}`;
-      const dance = cleanDanceName(inlineLesson[2]);
-      if (isDanceCandidate(dance) && !shouldIgnoreDance(dance, section)) entries.push({ section, name: dance });
-      return;
-    }
-
-    if (/warm\s*up/.test(normalized)) return (section = "Warm Up");
-    if (/lesson\s*1\b/.test(normalized)) return (section = "After Lesson 1");
-    if (/lesson\s*2\b/.test(normalized)) return (section = "After Lesson 2");
-    if (/lesson\s*3\b/.test(normalized)) return (section = "After Lesson 3");
-    if (/swing\b/.test(normalized)) return (section = "Swing Block");
-    if (isMetaNoise(normalized)) return;
-
-    const dance = cleanDanceName(line);
-    if (!isDanceCandidate(dance) || shouldIgnoreDance(dance, section)) return;
-    entries.push({ section, name: dance });
-  });
-
-  return entries;
 }
 
 function saveCurrentNight() {
@@ -515,17 +419,11 @@ function renderSectionGroups(sections) {
 function onStatsFilterChange() {
   statsFilters.topN = clampNumber(statsTopNInput.value, 1, 50, 10);
   statsFilters.sectionTopN = clampNumber(statsSectionTopNInput.value, 1, 20, 5);
-  statsFilters.minNights = clampNumber(statsMinNightsInput.value, 1, 99, 1);
-  statsFilters.rankMode = statsRankModeSelect.value === "nights" ? "nights" : "plays";
-  statsFilters.beginnerFilter = ["all", "beginner_only", "exclude_beginner"].includes(statsBeginnerFilterSelect.value)
-    ? statsBeginnerFilterSelect.value
-    : "all";
+  statsFilters.includeBeginner = statsIncludeBeginnerCheckbox.checked;
 
   statsTopNInput.value = String(statsFilters.topN);
   statsSectionTopNInput.value = String(statsFilters.sectionTopN);
-  statsMinNightsInput.value = String(statsFilters.minNights);
-  statsRankModeSelect.value = statsFilters.rankMode;
-  statsBeginnerFilterSelect.value = statsFilters.beginnerFilter;
+  statsIncludeBeginnerCheckbox.checked = statsFilters.includeBeginner;
   renderStats();
 }
 
@@ -561,12 +459,11 @@ function syncStatsSectionFilterOptions() {
   });
 }
 
-function passesBeginnerFilter(danceName, filter) {
+function passesBeginnerFilter(danceName, includeBeginner) {
   const key = normalizeKey(danceName);
   const beginner = Boolean(danceMeta[key]?.beginner);
-  if (filter === "beginner_only") return beginner;
-  if (filter === "exclude_beginner") return !beginner;
-  return true;
+  if (includeBeginner) return true;
+  return !beginner;
 }
 
 function computeStats(filters) {
@@ -590,7 +487,7 @@ function computeStats(filters) {
 
       section.dances.forEach((dance) => {
         if (shouldIgnoreDance(dance.name, section.name)) return;
-        if (!passesBeginnerFilter(dance.name, filters.beginnerFilter)) return;
+        if (!passesBeginnerFilter(dance.name, filters.includeBeginner)) return;
 
         nightHasData = true;
         totalEntries += 1;
@@ -635,15 +532,13 @@ function computeStats(filters) {
       ...item,
       appearanceRate: includedNights ? Math.round((item.nightsPlayed / includedNights) * 100) : 0,
     }))
-    .filter((item) => item.nightsPlayed >= filters.minNights)
-    .sort((a, b) => sortRankItems(a, b, filters.rankMode));
+    .sort((a, b) => b.count - a.count || b.nightsPlayed - a.nightsPlayed || a.name.localeCompare(b.name));
 
   const bySectionRankings = Array.from(bySectionMap.entries())
     .map(([section, map]) => ({
       section,
       dances: Array.from(map.values())
-        .filter((item) => item.nightsPlayed >= filters.minNights)
-        .sort((a, b) => sortRankItems(a, b, filters.rankMode)),
+        .sort((a, b) => b.count - a.count || b.nightsPlayed - a.nightsPlayed || a.name.localeCompare(b.name)),
     }))
     .filter((item) => item.dances.length > 0)
     .sort((a, b) => toSectionLevel(a.section) - toSectionLevel(b.section) || a.section.localeCompare(b.section));
@@ -661,7 +556,6 @@ function computeStats(filters) {
 function renderStats() {
   danceMeta = loadDanceMeta();
   const stats = computeStats(statsFilters);
-  const metricLabel = statsFilters.rankMode === "nights" ? "night(s)" : "time(s)";
 
   topDancesTitleEl.textContent = `Top ${statsFilters.topN} Most Frequently Played Overall`;
   sectionTopDancesTitleEl.textContent = `Most Frequently Played by Section (Top ${statsFilters.sectionTopN})`;
@@ -669,7 +563,6 @@ function renderStats() {
   summaryCardsEl.innerHTML = "";
   const cards = [
     ["Saved nights", String(stats.totalNights)],
-    ["Included nights", String(stats.includedNights)],
     ["Total entries", String(stats.totalEntries)],
     ["Unique dances", String(stats.uniqueDances)],
   ];
@@ -684,14 +577,14 @@ function renderStats() {
   if (stats.rankings.length === 0) {
     topDancesEl.innerHTML = `<li class="muted">No dances match these filters.</li>`;
   } else {
-    const maxMetric = getRankMetric(stats.rankings[0], statsFilters.rankMode);
+    const maxMetric = stats.rankings[0].count;
     stats.rankings.slice(0, statsFilters.topN).forEach((dance, idx) => {
       const li = document.createElement("li");
-      const metric = getRankMetric(dance, statsFilters.rankMode);
+      const metric = dance.count;
       const pct = maxMetric ? Math.round((metric / maxMetric) * 100) : 0;
       li.innerHTML = `
         <div><strong>#${idx + 1} ${escapeHtml(dance.name)}</strong></div>
-        <div class="muted">${metric} ${metricLabel}, ${dance.count} total plays, appearance rate ${dance.appearanceRate}%</div>
+        <div class="muted">${metric} total plays, ${dance.nightsPlayed} night(s), appearance rate ${dance.appearanceRate}%</div>
         <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
       `;
       topDancesEl.appendChild(li);
@@ -714,7 +607,7 @@ function renderStats() {
       list.className = "mini-dance-list";
       section.dances.slice(0, statsFilters.sectionTopN).forEach((dance) => {
         const li = document.createElement("li");
-        li.textContent = `${dance.name} (${getRankMetric(dance, statsFilters.rankMode)} ${metricLabel})`;
+        li.textContent = `${dance.name} (${dance.count} plays)`;
         list.appendChild(li);
       });
       card.append(title, list);
@@ -780,41 +673,8 @@ function resolveSection() {
   return customSectionInput.value.trim() || "";
 }
 
-function setOcrStatus(message) {
-  ocrStatusEl.textContent = message;
-}
-
-function isMetaNoise(line) {
-  return (
-    /tonight'?s playlist/.test(line) ||
-    /follow us/.test(line) ||
-    /instagram/.test(line) ||
-    /admission/.test(line) ||
-    /commissioner/.test(line) ||
-    /scan/.test(line) ||
-    /qr/.test(line)
-  );
-}
-
-function isDanceCandidate(value) {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) return false;
-  if (trimmed.length < 2) return false;
-  if (/^(warm up|lesson\s*[123])$/i.test(trimmed)) return false;
-  if (/^[\W_]+$/.test(trimmed)) return false;
-  return true;
-}
-
 function clampNumber(value, min, max, fallback) {
   const num = Number(value);
   if (!Number.isFinite(num)) return fallback;
   return Math.min(max, Math.max(min, num));
-}
-
-function getRankMetric(item, mode) {
-  return mode === "nights" ? item.nightsPlayed : item.count;
-}
-
-function sortRankItems(a, b, mode) {
-  return getRankMetric(b, mode) - getRankMetric(a, mode) || b.count - a.count || a.name.localeCompare(b.name);
 }

@@ -331,22 +331,44 @@ button.danger {
   margin-top: 0.45rem;
 }
 
+#stats-filters-body {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stats-filters .field-grid {
+  gap: 0.55rem;
+}
+
+.stats-inline-row {
+  display: flex;
+  align-items: center;
+}
+
+.stats-inline-row .stats-section-option {
+  width: fit-content;
+  min-width: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 .stats-sections-filter {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .stats-section-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   border: 1px solid var(--line);
   border-radius: 0.55rem;
   background: #fff;
-  padding: 0.45rem 0.55rem;
+  padding: 0.35rem 0.5rem;
   margin-top: 0;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .stats-section-option input {
@@ -356,7 +378,7 @@ button.danger {
 
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.65rem;
 }
 
