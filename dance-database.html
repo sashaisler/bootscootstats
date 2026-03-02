@@ -27,6 +27,12 @@
         <a href="dance-notes.html">Dance Notes</a>
         <a href="dance-database.html" class="active">Dance Database</a>
       </nav>
+      <div class="data-tools">
+        <button type="button" id="export-data-btn" class="secondary">Export Data</button>
+        <button type="button" id="import-data-btn">Import Data</button>
+        <input type="file" id="import-data-file" accept="application/json" class="hidden" />
+        <p id="data-tools-status" class="muted">Back up or restore your saved data.</p>
+      </div>
     </header>
 
     <main class="single-layout">
@@ -79,6 +85,7 @@
     </main>
 
     <script src="data-store.js"></script>
+    <script src="data-tools.js"></script>
     <script src="dance-database.js"></script>
   </body>
 </html>

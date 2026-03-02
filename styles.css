@@ -105,6 +105,19 @@ h1 {
   border-color: transparent;
 }
 
+.data-tools {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+}
+
+.data-tools button {
+  width: auto;
+  margin-top: 0;
+  padding: 0.45rem 0.7rem;
+}
+
 .layout {
   max-width: 1200px;
   margin: 0 auto;
@@ -593,7 +606,8 @@ button.danger {
   .summary-cards,
   .stats-sections-filter,
   .history-actions,
-  .notes-columns {
+  .notes-columns,
+  .data-tools {
     grid-template-columns: 1fr;
   }
 

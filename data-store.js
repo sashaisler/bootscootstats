@@ -120,6 +120,45 @@ function saveDanceNotes(notes) {
   saveJson(DANCE_NOTES_KEY, Array.isArray(notes) ? notes : []);
 }
 
+function exportAppData() {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    playlists: loadPlaylists(),
+    danceMeta: loadDanceMeta(),
+    danceNotes: loadDanceNotes(),
+  };
+}
+
+function importAppData(payload) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid backup file.");
+  }
+
+  const playlists = Array.isArray(payload.playlists) ? payload.playlists : [];
+  const danceMeta = payload.danceMeta && typeof payload.danceMeta === "object" ? payload.danceMeta : {};
+  const danceNotes = Array.isArray(payload.danceNotes) ? payload.danceNotes : [];
+
+  savePlaylists(
+    playlists
+      .map((night) => ({
+        id: night.id || createId(),
+        date: night.date,
+        venue: String(night.venue || ""),
+        sections: sanitizeSections(night.sections),
+      }))
+      .filter((night) => night.date && night.sections.length > 0),
+  );
+  saveDanceMeta(danceMeta);
+  saveDanceNotes(
+    danceNotes.map((note) => ({
+      id: note.id || createId(),
+      name: cleanDanceName(note.name),
+      status: note.status,
+    })),
+  );
+}
+
 function getAllSectionNames(playlists) {
   const dynamic = playlists.flatMap((night) => night.sections.map((section) => section.name.trim())).filter(Boolean);
   return [...new Set([...SECTION_PRESETS, ...dynamic])].sort(
