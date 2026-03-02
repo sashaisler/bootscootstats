@@ -187,6 +187,7 @@ function renderSavedPlaylists() {
     const editor = buildPlaylistEditor(playlist);
 
     editBtn.addEventListener("click", () => {
+      details.open = false;
       editor.classList.toggle("hidden");
     });
 
