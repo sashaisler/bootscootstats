@@ -11,6 +11,7 @@ const clearCurrentBtn = document.querySelector("#clear-current");
 const statsTopNInput = document.querySelector("#stats-top-n");
 const statsSectionTopNInput = document.querySelector("#stats-section-top-n");
 const statsIncludeBeginnerCheckbox = document.querySelector("#stats-include-beginner");
+const statsExcludeKnowWellCheckbox = document.querySelector("#stats-exclude-know-well");
 const statsSectionsFilterEl = document.querySelector("#stats-sections-filter");
 
 const currentSectionsEl = document.querySelector("#current-sections");
@@ -30,6 +31,7 @@ const statsFilters = {
   topN: 10,
   sectionTopN: 5,
   includeBeginner: true,
+  excludeKnowWell: false,
   includedSections: new Set(getAllSectionNames(playlists)),
 };
 
@@ -70,6 +72,7 @@ function wireEvents() {
   statsTopNInput.addEventListener("change", onStatsFilterChange);
   statsSectionTopNInput.addEventListener("change", onStatsFilterChange);
   statsIncludeBeginnerCheckbox.addEventListener("change", onStatsFilterChange);
+  statsExcludeKnowWellCheckbox.addEventListener("change", onStatsFilterChange);
   statsSectionsFilterEl.addEventListener("change", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement) || target.type !== "checkbox") return;
@@ -425,10 +428,12 @@ function onStatsFilterChange() {
   statsFilters.topN = clampNumber(statsTopNInput.value, 1, 50, 10);
   statsFilters.sectionTopN = clampNumber(statsSectionTopNInput.value, 1, 20, 5);
   statsFilters.includeBeginner = statsIncludeBeginnerCheckbox.checked;
+  statsFilters.excludeKnowWell = statsExcludeKnowWellCheckbox.checked;
 
   statsTopNInput.value = String(statsFilters.topN);
   statsSectionTopNInput.value = String(statsFilters.sectionTopN);
   statsIncludeBeginnerCheckbox.checked = statsFilters.includeBeginner;
+  statsExcludeKnowWellCheckbox.checked = statsFilters.excludeKnowWell;
   renderStats();
 }
 
@@ -471,8 +476,17 @@ function passesBeginnerFilter(danceName, includeBeginner) {
   return !beginner;
 }
 
+function buildKnowWellSet() {
+  return new Set(
+    loadDanceNotes()
+      .filter((note) => note?.status === "know_well")
+      .map((note) => normalizeKey(note.name)),
+  );
+}
+
 function computeStats(filters) {
   const includedSections = new Set(Array.from(filters.includedSections).map((name) => normalizeKey(name)));
+  const knowWellSet = buildKnowWellSet();
   const danceMap = new Map();
   const bySectionMap = new Map();
   let totalEntries = 0;
@@ -493,6 +507,7 @@ function computeStats(filters) {
       section.dances.forEach((dance) => {
         if (shouldIgnoreDance(dance.name, section.name)) return;
         if (!passesBeginnerFilter(dance.name, filters.includeBeginner)) return;
+        if (filters.excludeKnowWell && knowWellSet.has(normalizeKey(dance.name))) return;
 
         nightHasData = true;
         totalEntries += 1;
